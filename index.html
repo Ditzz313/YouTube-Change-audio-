@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>YouTube Language Player</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:linear-gradient(135deg,#0f172a,#1e293b);
+  color:white;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  min-height:100vh;
+}
+.container{
+  width:90%;
+  max-width:900px;
+  background:rgba(255,255,255,0.05);
+  padding:20px;
+  border-radius:20px;
+  backdrop-filter:blur(10px);
+  box-shadow:0 0 20px rgba(0,0,0,.4);
+}
+iframe{
+  width:100%;
+  height:450px;
+  border:none;
+  border-radius:15px;
+}
+.controls{
+  margin-top:20px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+}
+input,select,button{
+  padding:12px;
+  border:none;
+  border-radius:10px;
+}
+input{flex:1;}
+button{
+  background:#38bdf8;
+  font-weight:bold;
+  cursor:pointer;
+}
+.track-box{
+  margin-top:15px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+label{
+  font-size:14px;
+  margin-bottom:5px;
+  display:block;
+}
+.group{
+  background:#1e293b;
+  padding:10px;
+  border-radius:12px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <h2>🎥 YouTube Audio Track Player</h2>
+
+  <iframe id="player"
+    src="https://www.youtube.com/embed/dQw4w9WgXcQ?cc_load_policy=1&cc_lang_pref=id">
+  </iframe>
+
+  <div class="controls">
+    <input type="text" id="url" placeholder="Paste Link YouTube...">
+    <button onclick="loadVideo()">PLAY</button>
+  </div>
+
+  <div class="track-box">
+    <div class="group">
+      <label>🎙️ Audio Track</label>
+      <select id="audioTrack">
+        <option value="id">Indonesia Dub</option>
+        <option value="en">English</option>
+        <option value="ja">Japanese</option>
+        <option value="ko">Korean</option>
+      </select>
+    </div>
+
+    <div class="group">
+      <label>💬 Subtitle</label>
+      <select id="subtitle">
+        <option value="id">Indonesia</option>
+        <option value="en">English</option>
+        <option value="ja">Japanese</option>
+        <option value="ko">Korean</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<script>
+function getYoutubeID(url){
+ let regExp=/^(?:.*(?:youtu.be\/|v\/|embed\/|watch\?v=|\&v=))([^#\&\?]*).*/;
+ let match=url.match(regExp);
+ return (match&&match[1].length==11)?match[1]:false;
+}
+
+function loadVideo(){
+ let url=document.getElementById("url").value;
+ let subtitle=document.getElementById("subtitle").value;
+ let audio=document.getElementById("audioTrack").value;
+ let id=getYoutubeID(url);
+
+ if(id){
+   document.getElementById("player").src=
+   `https://www.youtube.com/embed/${id}?autoplay=1&cc_load_policy=1&cc_lang_pref=${subtitle}&hl=${audio}`;
+ }else{
+   alert("Link YouTube tidak valid!");
+ }
+}
+</script>
+
+</body>
+          </html>
