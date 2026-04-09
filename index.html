@@ -1,129 +1,99 @@
-<!DOCTYPE html>
-<html lang="id">
+<!DOCTYPE html><html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YouTube Language Player</title>
-
+<title>PalRyz Video Search</title>
 <style>
-body{
-  margin:0;
-  font-family:Arial,sans-serif;
-  background:linear-gradient(135deg,#0f172a,#1e293b);
-  color:white;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
-}
-.container{
-  width:90%;
-  max-width:900px;
-  background:rgba(255,255,255,0.05);
-  padding:20px;
-  border-radius:20px;
-  backdrop-filter:blur(10px);
-  box-shadow:0 0 20px rgba(0,0,0,.4);
-}
-iframe{
-  width:100%;
-  height:450px;
-  border:none;
-  border-radius:15px;
-}
-.controls{
-  margin-top:20px;
-  display:flex;
-  flex-wrap:wrap;
-  gap:10px;
-}
-input,select,button{
-  padding:12px;
-  border:none;
-  border-radius:10px;
-}
-input{flex:1;}
-button{
-  background:#38bdf8;
-  font-weight:bold;
-  cursor:pointer;
-}
-.track-box{
-  margin-top:15px;
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
-label{
-  font-size:14px;
-  margin-bottom:5px;
-  display:block;
-}
-.group{
-  background:#1e293b;
-  padding:10px;
-  border-radius:12px;
-}
-</style>
+*{box-sizing:border-box;font-family:Arial,sans-serif;-webkit-tap-highlight-color:transparent;scroll-behavior:smooth}
+body{margin:0;background:linear-gradient(135deg,#0f172a,#1e293b);padding:20px;color:#fff;overflow-x:hidden;-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
+.container{max-width:420px;margin:auto;background:rgba(255,255,255,.05);padding:18px;border-radius:24px;backdrop-filter:blur(12px);box-shadow:0 8px 30px rgba(0,0,0,.35);animation:fadeIn .5s ease;will-change:transform}
+h2{text-align:center;margin-top:0}
+.video-wrap{overflow:hidden;border-radius:20px;background:#000;aspect-ratio:9/16;margin-bottom:15px}
+iframe{width:100%;height:100%;border:none}
+.search-box{display:flex;gap:10px;margin-bottom:14px}
+input{flex:1;padding:14px;border:none;border-radius:14px;font-size:15px;outline:none}
+button{border:none;border-radius:14px;padding:14px 16px;font-weight:bold;cursor:pointer;background:#38bdf8;color:#00111f}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:15px}
+.secondary{background:#334155;color:#fff}
+.history{background:#162033;padding:14px;border-radius:18px}
+.history h3{margin:0 0 10px 0;font-size:16px}
+.history-item{background:#243247;padding:10px;border-radius:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.history-item span{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
+.small-btn{padding:8px 10px;border-radius:10px;font-size:12px}.history::-webkit-scrollbar{width:4px} .history::-webkit-scrollbar-thumb{background:#38bdf8;border-radius:10px} @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}} </style>
+
 </head>
 <body>
-
 <div class="container">
-  <h2>🎥 YouTube Audio Track Player</h2>
-
-  <iframe id="player"
-    src="https://www.youtube.com/embed/dQw4w9WgXcQ?cc_load_policy=1&cc_lang_pref=id">
-  </iframe>
-
-  <div class="controls">
-    <input type="text" id="url" placeholder="Paste Link YouTube...">
-    <button onclick="loadVideo()">PLAY</button>
-  </div>
-
-  <div class="track-box">
-    <div class="group">
-      <label>🎙️ Audio Track</label>
-      <select id="audioTrack">
-        <option value="id">Indonesia Dub</option>
-        <option value="en">English</option>
-        <option value="ja">Japanese</option>
-        <option value="ko">Korean</option>
-      </select>
-    </div>
-
-    <div class="group">
-      <label>💬 Subtitle</label>
-      <select id="subtitle">
-        <option value="id">Indonesia</option>
-        <option value="en">English</option>
-        <option value="ja">Japanese</option>
-        <option value="ko">Korean</option>
-      </select>
-    </div>
-  </div>
+<h2>🎥 Video Search Player</h2>
+<div class="video-wrap" style="position:relative;">
+<div id="loading" style="position:absolute;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;z-index:2;border-radius:20px;">⏳ Loading Video...</div>
+<iframe id="player" src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen onload="hideLoading()"></iframe>
 </div>
-
+<div class="search-box">
+<input id="query" placeholder="Paste link / cari judul video...">
+<button onclick="handleSearch()">Cari</button>
+</div>
+<div class="actions">
+<button class="secondary" onclick="randomVideo()">🎲 Random</button>
+<button class="secondary" onclick="clearHistory()">🗑 Hapus History</button>
+</div>
+<div class="history">
+<h3>📜 History Pencarian</h3>
+<div id="historyList"></div>
+</div>
+</div>
 <script>
-function getYoutubeID(url){
- let regExp=/^(?:.*(?:youtu.be\/|v\/|embed\/|watch\?v=|\&v=))([^#\&\?]*).*/;
- let match=url.match(regExp);
- return (match&&match[1].length==11)?match[1]:false;
+function getID(text){
+ let reg=/(?:youtu\.be\/|watch\?v=|embed\/)([a-zA-Z0-9_-]{11})/;
+ let m=text.match(reg);
+ return m?m[1]:null;
 }
-
-function loadVideo(){
- let url=document.getElementById("url").value;
- let subtitle=document.getElementById("subtitle").value;
- let audio=document.getElementById("audioTrack").value;
- let id=getYoutubeID(url);
-
+function handleSearch(){
+ let q=document.getElementById('query').value.trim();
+ if(!q)return;
+ let id=getID(q);
  if(id){
-   document.getElementById("player").src=
-   `https://www.youtube.com/embed/${id}?autoplay=1&cc_load_policy=1&cc_lang_pref=${subtitle}&hl=${audio}`;
+   document.getElementById('player').src=`https://www.youtube.com/embed/${id}?autoplay=1&vq=hd1080`;
+   saveHistory(q);
  }else{
-   alert("Link YouTube tidak valid!");
+   saveHistory(q);
+   alert('Mode cari judul langsung belum aktif. Masukkan link YouTube agar video diputar tanpa pindah ke YouTube.');
  }
 }
-</script>
+function saveHistory(text){
+ let data=JSON.parse(localStorage.getItem('ytHistory')||'[]');
+ data.unshift(text);
+ data=[...new Set(data)].slice(0,6);
+ localStorage.setItem('ytHistory',JSON.stringify(data));
+ renderHistory();
+}
+function renderHistory(){
+ let data=JSON.parse(localStorage.getItem('ytHistory')||'[]');
+ let list=document.getElementById('historyList');
+ list.innerHTML='';
+ if(!data.length){list.innerHTML='<small>Belum ada history</small>';return;}
+ data.forEach(item=>{
+   list.innerHTML+=`<div class="history-item"><span>${item}</span><button class="small-btn" onclick="reuseHistory('${item.replace(/'/g,"\\'")}')">Pakai</button></div>`;
+ });
+}
+function reuseHistory(val){
+ document.getElementById('query').value=val;
+ handleSearch();
+}
+function clearHistory(){
+ localStorage.removeItem('ytHistory');
+ renderHistory();
+}
+function randomVideo(){
+ const vids=['dQw4w9WgXcQ','TP9wd8Aeh3I','3JZ_D3ELwOQ'];
+ let pick=vids[Math.floor(Math.random()*vids.length)];
+ document.getElementById('player').src=`https://www.youtube.com/embed/${pick}?autoplay=1`;
+}
+function hideLoading(){
+ document.getElementById('loading').style.display='none';
+}const oldHandleSearch = handleSearch; handleSearch = function(){ document.getElementById('loading').style.display='flex'; oldHandleSearch(); }
+
+renderHistory(); </script>
 
 </body>
-          </html>
+</html>
