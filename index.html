@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PalRyz Video Player Pro</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PalRyz Netflix Player</title>
 
 <style>
 *{
@@ -15,154 +15,183 @@ font-family:'Segoe UI',sans-serif;
 }
 
 body{
-background:linear-gradient(135deg,#020617,#0f172a,#1e293b);
-padding:15px;
+background:#000;
 color:white;
+overflow-x:hidden;
+touch-action:manipulation;
+}
+
+/* INTRO */
+#intro{
+position:fixed;
+inset:0;
+background:black;
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:9999;
+font-size:40px;
+font-weight:bold;
+color:red;
+animation:introAnim 4s forwards;
+}
+
+@keyframes introAnim{
+0%{opacity:0;transform:scale(0.5);}
+30%{opacity:1;transform:scale(1.2);}
+70%{opacity:1;}
+100%{opacity:0;visibility:hidden;}
 }
 
 .container{
 max-width:420px;
 margin:auto;
-background:rgba(255,255,255,0.05);
-backdrop-filter:blur(15px);
 padding:15px;
-border-radius:25px;
-box-shadow:0 10px 30px rgba(0,0,0,0.4);
+display:none;
+animation:fade .8s;
 }
 
-/* VIDEO */
+@keyframes fade{
+from{opacity:0;}
+to{opacity:1;}
+}
+
 .video-wrap{
 width:100%;
 aspect-ratio:9/16;
-border-radius:25px;
+border-radius:20px;
 overflow:hidden;
-background:black;
+background:#000;
 position:relative;
-box-shadow:0 0 20px rgba(56,189,248,0.3);
+box-shadow:0 0 30px rgba(255,0,0,0.3);
 }
 
 iframe{
 width:100%;
 height:100%;
 border:none;
-}
-
-/* SUBTITLE BOX */
-.subtitle-box{
-margin-top:10px;
-background:rgba(0,0,0,0.6);
-padding:14px;
-border-radius:15px;
-text-align:center;
-font-size:14px;
-color:#fff;
-min-height:50px;
-border:1px solid rgba(255,255,255,0.1);
-}
-
-/* INPUT */
-.search-area{
-margin-top:18px;
-display:flex;
-gap:10px;
-}
-
-input{
-flex:1;
-padding:15px;
-border:none;
-border-radius:16px;
-outline:none;
-font-size:14px;
-background:#1e293b;
-color:white;
-box-shadow:inset 0 0 10px rgba(0,0,0,0.4);
-}
-
-button{
-padding:15px 18px;
-border:none;
-border-radius:16px;
-background:linear-gradient(135deg,#38bdf8,#0ea5e9);
-color:#fff;
-font-weight:bold;
-cursor:pointer;
-box-shadow:0 4px 15px rgba(56,189,248,0.4);
-transition:.3s;
-}
-
-button:hover{
-transform:scale(1.05);
-}
-
-/* HISTORY */
-.history{
-margin-top:15px;
-padding:15px;
-background:#0f172a;
-border-radius:20px;
-}
-
-.history h3{
-margin-bottom:10px;
-}
-
-.item{
-background:#1e293b;
-padding:10px;
-margin-bottom:8px;
-border-radius:12px;
-font-size:13px;
-cursor:pointer;
+object-fit:contain;
 }
 
 /* LOADING */
 .loading{
 position:absolute;
 inset:0;
-background:rgba(0,0,0,.7);
+background:rgba(0,0,0,.8);
 display:flex;
 justify-content:center;
 align-items:center;
-font-size:18px;
+font-size:20px;
 z-index:5;
+animation:fadePulse 1s infinite;
+}
+
+@keyframes fadePulse{
+0%,100%{opacity:1;}
+50%{opacity:.5;}
+}
+
+/* SUBTITLE */
+.subtitle-box{
+margin-top:10px;
+background:rgba(20,20,20,.95);
+padding:15px;
+border-radius:15px;
+text-align:center;
+font-size:15px;
+min-height:55px;
+animation:subtitleFade 2s infinite alternate;
+}
+
+@keyframes subtitleFade{
+from{opacity:.6;transform:translateY(3px);}
+to{opacity:1;transform:translateY(-3px);}
+}
+
+.search-area{
+display:flex;
+gap:10px;
+margin-top:15px;
+}
+
+input{
+flex:1;
+padding:14px;
+border:none;
+border-radius:15px;
+background:#111;
+color:#fff;
+font-size:14px;
+}
+
+button{
+padding:14px 18px;
+border:none;
+border-radius:15px;
+background:red;
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+
+.history{
+margin-top:15px;
+background:#111;
+padding:15px;
+border-radius:15px;
+}
+
+.item{
+padding:10px;
+background:#222;
+margin-top:8px;
+border-radius:10px;
+font-size:13px;
+cursor:pointer;
 }
 </style>
 </head>
 <body>
 
-<div class="container">
+<div id="intro">PALRYZ</div>
+
+<div class="container" id="main">
 
 <div class="video-wrap">
-<div class="loading" id="loading">⏳ Loading...</div>
+<div class="loading" id="loading">Loading...</div>
+
 <iframe id="player"
 src="https://www.youtube.com/embed/dQw4w9WgXcQ?cc_load_policy=1"
 allowfullscreen
-onload="hideLoading()">
-</iframe>
+onload="hideLoading()"></iframe>
 </div>
 
-<div class="subtitle-box" id="subtitleBox">
-🎵 Subtitle akan muncul otomatis jika video support caption
+<div class="subtitle-box" id="subtitle">
+🎬 Subtitle Real-Time Aktif...
 </div>
 
 <div class="search-area">
-<input id="query" placeholder="Paste link YouTube disini...">
-<button onclick="playVideo()">▶ Putar</button>
+<input id="query" placeholder="Paste link YouTube...">
+<button onclick="playVideo()">PLAY</button>
 </div>
 
 <div class="history">
-<h3>📜 History</h3>
+<h3>History</h3>
 <div id="historyList"></div>
 </div>
 
 </div>
 
 <script>
+setTimeout(()=>{
+document.getElementById("intro").style.display="none";
+document.getElementById("main").style.display="block";
+},4000);
+
 function getID(url){
 let reg=/(?:youtu\\.be\\/|watch\\?v=|embed\\/)([a-zA-Z0-9_-]{11})/;
-let match=url.match(reg);
-return match?match[1]:null;
+let m=url.match(reg);
+return m?m[1]:null;
 }
 
 function playVideo(){
@@ -178,8 +207,13 @@ document.getElementById("player").src=
 `https://www.youtube.com/embed/${id}?autoplay=1&cc_load_policy=1`;
 
 saveHistory(q);
+
+setTimeout(()=>{
+hideLoading();
+},4000);
+
 }else{
-alert("Masukkan link YouTube valid!");
+alert("Link YouTube tidak valid!");
 }
 }
 
@@ -188,19 +222,19 @@ document.getElementById("loading").style.display="none";
 }
 
 function saveHistory(link){
-let data=JSON.parse(localStorage.getItem("historyYT")||"[]");
+let data=JSON.parse(localStorage.getItem("history")||"[]");
 
 data.unshift(link);
 
 data=[...new Set(data)].slice(0,5);
 
-localStorage.setItem("historyYT",JSON.stringify(data));
+localStorage.setItem("history",JSON.stringify(data));
 
 renderHistory();
 }
 
 function renderHistory(){
-let data=JSON.parse(localStorage.getItem("historyYT")||"[]");
+let data=JSON.parse(localStorage.getItem("history")||"[]");
 
 let html="";
 
@@ -209,7 +243,7 @@ html+=`<div class="item" onclick="reuse('${item}')">${item}</div>`;
 });
 
 document.getElementById("historyList").innerHTML=
-html||"<small>Belum ada history</small>";
+html||"Belum ada history";
 }
 
 function reuse(val){
@@ -218,6 +252,21 @@ playVideo();
 }
 
 renderHistory();
+
+/* Subtitle fake animation */
+const subtitleText=[
+"🎬 Memutar video...",
+"🍿 Subtitle aktif...",
+"🔥 Mode Netflix On...",
+"🎵 Menyesuaikan caption..."
+];
+
+let i=0;
+
+setInterval(()=>{
+document.getElementById("subtitle").innerText=subtitleText[i];
+i=(i+1)%subtitleText.length;
+},2500);
 </script>
 
 </body>
