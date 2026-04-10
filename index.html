@@ -3,271 +3,311 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>PALRYZ PLAYER PRO</title>
+<title>Nobar Ultimate</title>
 
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Segoe UI',sans-serif;
--webkit-tap-highlight-color:transparent;
-}
-
 body{
-background:linear-gradient(180deg,#020617,#0f172a,#1e293b);
-padding:15px;
-overflow-x:hidden;
-color:white;
+    margin:0;
+    font-family:Arial;
+    background:#0f172a;
+    color:#fff;
 }
 
-/* CONTAINER */
-.container{
-max-width:420px;
-margin:auto;
-background:rgba(255,255,255,.05);
-padding:18px;
-border-radius:28px;
-backdrop-filter:blur(20px);
-box-shadow:0 0 35px rgba(0,140,255,.35);
-position:relative;
-overflow:hidden;
+/* HEADER */
+.header{
+    display:flex;
+    gap:5px;
+    padding:10px;
+    background:#020617;
 }
 
-/* TOP */
-.topbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:15px;
+button{
+    background:#38bdf8;
+    border:none;
+    padding:10px;
+    cursor:pointer;
 }
 
-.logo{
-font-size:22px;
-font-weight:bold;
-}
-
-.menu-btn{
-width:45px;
-height:45px;
-border:none;
-border-radius:14px;
-background:#1e293b;
-color:white;
-font-size:22px;
-cursor:pointer;
-}
-
-/* SIDEBAR MENU */
-.sidebar{
-position:fixed;
-top:0;
-right:-260px;
-width:240px;
-height:100%;
-background:#0f172a;
-padding:20px;
-box-shadow:-5px 0 25px rgba(0,0,0,.4);
-transition:.4s ease;
-z-index:9999;
-overflow-y:auto;
-}
-
-.sidebar.active{
-right:0;
-}
-
-.sidebar h3{
-margin-bottom:15px;
-}
-
-.history-item{
-background:#1e293b;
-padding:12px;
-margin-bottom:10px;
-border-radius:12px;
-font-size:13px;
-cursor:pointer;
-transition:.3s;
-}
-
-.history-item:hover{
-background:#38bdf8;
+input{
+    flex:1;
+    padding:10px;
+    border:none;
+    outline:none;
 }
 
 /* VIDEO */
-.video-wrap{
-width:100%;
-aspect-ratio:9/16;
-border-radius:25px;
-overflow:hidden;
-background:black;
-box-shadow:0 0 25px rgba(59,130,246,.3);
+.video{
+    height:220px;
+    background:#000;
+    display:flex;
+    align-items:center;
+    justify-content:center;
 }
 
 iframe{
-width:100%;
-height:100%;
-border:none;
+    width:100%;
+    height:100%;
 }
 
-/* SUBTITLE */
-.subtitle{
-margin-top:15px;
-padding:14px;
-background:#0f172a;
-border-radius:18px;
-text-align:center;
-font-size:15px;
+/* CHAT */
+.chat{
+    height:calc(100vh - 280px);
+    display:flex;
+    flex-direction:column;
 }
 
-/* SEARCH */
-.search-box{
-display:flex;
-gap:10px;
-margin-top:15px;
-width:100%;
+.messages{
+    flex:1;
+    overflow:auto;
+    padding:10px;
 }
 
-.search-box input{
-flex:1;
-min-width:0;
-padding:16px;
-border:none;
-border-radius:18px;
-background:#1e293b;
-color:white;
-font-size:15px;
-outline:none;
+.msg{
+    background:#1e293b;
+    padding:10px;
+    border-radius:10px;
+    margin-bottom:10px;
+    position:relative;
 }
 
-.play-btn{
-padding:0 22px;
-border:none;
-border-radius:18px;
-background:linear-gradient(135deg,#38bdf8,#0ea5e9);
-color:white;
-font-weight:bold;
-font-size:16px;
-cursor:pointer;
-white-space:nowrap;
-box-shadow:0 0 20px rgba(56,189,248,.5);
-transition:.3s;
+.msg b{ color:#38bdf8; }
+.tag{ color:yellow; }
+.react{ cursor:pointer; font-size:12px; }
+
+/* ACTION */
+.actions{
+    position:absolute;
+    right:10px;
+    top:5px;
+    font-size:12px;
+    cursor:pointer;
 }
 
-.play-btn:hover{
-transform:scale(1.05);
+/* INPUT */
+.input{
+    display:flex;
 }
 
-/* OVERLAY */
+.file{
+    width:40px;
+}
+
+/* SIDEBAR */
+.sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    width:250px;
+    height:100%;
+    background:#020617;
+    transform:translateX(-100%);
+    transition:0.3s;
+    padding:15px;
+    z-index:1000;
+}
+
+.sidebar.active{ transform:translateX(0); }
+
 .overlay{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,.4);
-display:none;
-z-index:999;
+    position:fixed;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.5);
+    display:none;
+    z-index:999;
 }
+.overlay.active{ display:block; }
 
-.overlay.active{
-display:block;
+.side-header{
+    display:flex;
+    justify-content:space-between;
 }
 </style>
 </head>
+
 <body>
 
-<div class="overlay" id="overlay" onclick="toggleMenu()"></div>
+<div class="header">
+    <button onclick="openMenu()">☰</button>
+    <input id="videoUrl" placeholder="Link YouTube...">
+    <button onclick="setVideo()">Play</button>
+</div>
+
+<div class="video" id="videoBox">
+    Masukkan link YouTube...
+</div>
+
+<div class="chat">
+    <div class="messages" id="messages"></div>
+
+    <div class="input">
+        <input type="file" id="file" class="file">
+        <input id="msg" placeholder="Ketik pesan...">
+        <button onclick="send()">Kirim</button>
+    </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeMenu()"></div>
 
 <div class="sidebar" id="sidebar">
-<h3>📜 History Video</h3>
-<div id="historyList"></div>
-</div>
-
-<div class="container">
-
-<div class="topbar">
-<div class="logo">🎥 PALRYZ</div>
-<button class="menu-btn" onclick="toggleMenu()">☰</button>
-</div>
-
-<div class="video-wrap">
-<iframe id="player"
-src="https://www.youtube.com/embed/dQw4w9WgXcQ?cc_load_policy=1"
-allowfullscreen></iframe>
-</div>
-
-<div class="subtitle">
-🎵 Subtitle akan muncul otomatis jika video support caption
-</div>
-
-<div class="search-box">
-<input id="query" placeholder="Paste link YouTube disini...">
-<button class="play-btn" onclick="playVideo()">▶ Putar</button>
-</div>
-
+    <div class="side-header">
+        <h3>Users</h3>
+        <button onclick="closeMenu()">✖</button>
+    </div>
+    <button onclick="changeName()">Ganti Nama</button>
+    <div id="users"></div>
 </div>
 
 <script>
-function toggleMenu(){
-document.getElementById("sidebar").classList.toggle("active");
-document.getElementById("overlay").classList.toggle("active");
+const channel = new BroadcastChannel("chat_app");
+
+// USER
+let name = localStorage.getItem("name") || prompt("Nama:");
+if(!name) name = "User"+Math.floor(Math.random()*999);
+localStorage.setItem("name", name);
+
+// USERS LIST
+let users = JSON.parse(localStorage.getItem("users")||"[]");
+if(!users.includes(name)){
+    users.push(name);
+    localStorage.setItem("users", JSON.stringify(users));
 }
 
-function getID(url){
-let reg=/(?:youtu\\.be\\/|watch\\?v=|embed\\/)([a-zA-Z0-9_-]{11})/;
-let m=url.match(reg);
-return m?m[1]:null;
+function renderUsers(){
+    let data = JSON.parse(localStorage.getItem("users")||"[]");
+    usersDiv.innerHTML = data.map(u=>`<div>🟢 ${u}</div>`).join("");
+}
+renderUsers();
+
+// SIDEBAR
+function openMenu(){
+    sidebar.classList.add("active");
+    overlay.classList.add("active");
+}
+function closeMenu(){
+    sidebar.classList.remove("active");
+    overlay.classList.remove("active");
 }
 
-function playVideo(){
-let q=document.getElementById("query").value.trim();
-let id=getID(q);
-
-if(!id){
-alert("Masukkan link YouTube valid!");
-return;
-}
-
-document.getElementById("player").src=
-`https://www.youtube.com/embed/${id}?autoplay=1&cc_load_policy=1`;
-
-saveHistory(q);
-}
-
-function saveHistory(link){
-let data=JSON.parse(localStorage.getItem("ytHistory")||"[]");
-
-data.unshift(link);
-data=[...new Set(data)].slice(0,8);
-
-localStorage.setItem("ytHistory",JSON.stringify(data));
-
-renderHistory();
-}
-
-function renderHistory(){
-let data=JSON.parse(localStorage.getItem("ytHistory")||"[]");
-
-let html="";
-
-if(!data.length){
-html="<small>Belum ada history</small>";
-}else{
-data.forEach(item=>{
-html+=`<div class="history-item" onclick="reuse('${item}')">${item}</div>`;
+// CHAT
+msg.addEventListener("keydown", e=>{
+    if(e.key==="Enter") send();
 });
+
+function send(){
+    let text = msg.value;
+    let fileInput = file.files[0];
+
+    if(!text && !fileInput) return;
+
+    if(fileInput){
+        let reader = new FileReader();
+        reader.onload = ()=>{
+            pushMessage(text, reader.result);
+        };
+        reader.readAsDataURL(fileInput);
+    } else {
+        pushMessage(text, null);
+    }
+
+    msg.value="";
+    file.value="";
 }
 
-document.getElementById("historyList").innerHTML=html;
+function pushMessage(text,img){
+    let data = {
+        id:Date.now(),
+        name,
+        text,
+        img,
+        like:0
+    };
+
+    channel.postMessage({type:"chat",data});
+    addMessage(data);
 }
 
-function reuse(link){
-document.getElementById("query").value=link;
-playVideo();
-toggleMenu();
+function addMessage(d){
+    let text = d.text.replace(/@\\w+/g, t=>`<span class='tag'>${t}</span>`);
+
+    let div = document.createElement("div");
+    div.className="msg";
+    div.id=d.id;
+
+    div.innerHTML = `
+        <div class="actions" onclick="del(${d.id})">🗑️</div>
+        <b>${d.name}</b><br>
+        ${text || ""}
+        ${d.img ? `<br><img src="${d.img}" width="100%">` : ""}
+        <br>
+        <span class="react" onclick="like(this)">👍 ${d.like}</span>
+    `;
+
+    messages.appendChild(div);
+    div.scrollIntoView();
+
+    // notifikasi
+    if(document.hidden){
+        document.title = "Pesan baru!";
+    }
 }
 
-renderHistory();
+// DELETE
+function del(id){
+    let el = document.getElementById(id);
+    if(el) el.remove();
+}
+
+// LIKE
+function like(el){
+    let n = parseInt(el.innerText.split(" ")[1]);
+    el.innerText = "👍 "+(n+1);
+}
+
+// VIDEO
+function getID(url){
+    try{
+        if(url.includes("youtu.be/"))
+            return url.split("youtu.be/")[1].split("?")[0];
+        if(url.includes("v="))
+            return url.split("v=")[1].split("&")[0];
+    }catch{}
+    return null;
+}
+
+function setVideo(){
+    let url = videoUrl.value;
+    channel.postMessage({type:"video",url});
+    play(url);
+}
+
+function play(url){
+    let id = getID(url);
+    if(!id){
+        videoBox.innerHTML="❌ Link salah";
+        return;
+    }
+
+    videoBox.innerHTML =
+        `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1"></iframe>`;
+}
+
+// CHANGE NAME
+function changeName(){
+    let newName = prompt("Nama baru:");
+    if(newName){
+        name = newName;
+        localStorage.setItem("name", name);
+        alert("Nama diganti!");
+    }
+}
+
+// RECEIVE
+channel.onmessage = (e)=>{
+    if(e.data.type==="chat") addMessage(e.data.data);
+    if(e.data.type==="video") play(e.data.url);
+};
 </script>
 
 </body>
-  </html>
+</html>
