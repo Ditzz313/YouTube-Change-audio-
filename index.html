@@ -42,6 +42,7 @@ background:#1b2a44;
 color:#fff;
 }
 
+/* BUTTON */
 button{
 background:#4da3ff;
 border:none;
@@ -61,6 +62,15 @@ background:#000;
 border-radius:16px;
 overflow:hidden;
 border:1px solid #223;
+position:relative;
+}
+
+.video iframe{
+width:100%;
+height:100%;
+border:none;
+border-radius:16px;
+display:block;
 }
 
 /* CHAT */
@@ -80,6 +90,7 @@ display:flex;
 flex-direction:column;
 gap:12px;
 border:1px solid #223;
+scroll-behavior:smooth;
 }
 
 /* ROW */
@@ -89,11 +100,15 @@ align-items:flex-end;
 gap:10px;
 }
 
-/* ALIGN */
-.userRow{justify-content:flex-end;}
-.aiRow{justify-content:flex-start;}
+.userRow{
+justify-content:flex-end;
+}
 
-/* PP */
+.aiRow{
+justify-content:flex-start;
+}
+
+/* PROFILE */
 .pp{
 width:34px;
 height:34px;
@@ -108,11 +123,16 @@ flex-shrink:0;
 
 /* BUBBLE */
 .bubble{
-padding:12px 14px;
+padding:14px 16px;
 max-width:70%;
 border-radius:14px;
+word-wrap:break-word;
 word-break:break-word;
-line-height:1.5;
+white-space:pre-wrap;
+line-height:1.7;
+font-size:14px;
+letter-spacing:.2px;
+overflow-wrap:break-word;
 }
 
 .user{
@@ -126,9 +146,10 @@ background:#1b2a44;
 color:#e6f0ff;
 border:1px solid #223;
 border-bottom-left-radius:4px;
+box-shadow:0 4px 12px rgba(0,0,0,.25);
 }
 
-/* TIME */
+/* JAM */
 .time{
 font-size:10px;
 opacity:.6;
@@ -171,9 +192,11 @@ justify-content:center;
 flex-shrink:0;
 }
 
-.fileBtn input{display:none}
+.fileBtn input{
+display:none;
+}
 
-/* TYPING ANIMATION */
+/* TYPING */
 .typing{
 display:flex;
 gap:4px;
@@ -189,12 +212,23 @@ border-radius:50%;
 animation:blink 1s infinite;
 }
 
-.dot:nth-child(2){animation-delay:.2s}
-.dot:nth-child(3){animation-delay:.4s}
+.dot:nth-child(2){
+animation-delay:.2s;
+}
+
+.dot:nth-child(3){
+animation-delay:.4s;
+}
 
 @keyframes blink{
-0%,80%,100%{opacity:.2; transform:translateY(0)}
-40%{opacity:1; transform:translateY(-4px)}
+0%,80%,100%{
+opacity:.2;
+transform:translateY(0);
+}
+40%{
+opacity:1;
+transform:translateY(-4px);
+}
 }
 
 /* CODE BOX */
@@ -207,10 +241,9 @@ border-radius:12px;
 overflow:auto;
 margin-top:6px;
 font-family:monospace;
-white-space:pre;
+white-space:pre-wrap;
 }
 
-/* COPY BUTTON */
 .copyBtn{
 position:absolute;
 top:6px;
@@ -221,6 +254,11 @@ padding:6px 10px;
 font-size:12px;
 border-radius:8px;
 cursor:pointer;
+}
+
+#typingText{
+display:block;
+width:100%;
 }
 </style>
 </head>
@@ -262,48 +300,71 @@ return d.getHours().toString().padStart(2,'0')+":"+
 d.getMinutes().toString().padStart(2,'0');
 }
 
-/* YT ID */
+/* GET YOUTUBE ID */
 function getID(url){
-if(!url) return null;
-if(url.includes("youtu.be/")) return url.split("youtu.be/")[1].split("?")[0];
-if(url.includes("v=")) return url.split("v=")[1].split("&")[0];
+if(!url)return null;
+
+if(url.includes("youtu.be/"))
+return url.split("youtu.be/")[1].split("?")[0];
+
+if(url.includes("v="))
+return url.split("v=")[1].split("&")[0];
+
 return null;
 }
 
-/* VIDEO */
+/* HANDLE VIDEO */
 async function handleVideo(){
 let input=videoUrl.value.trim();
-
 let id=getID(input);
+
 if(id){
-videoBox.innerHTML=`<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${id}?autoplay=1"></iframe>`;
+videoBox.innerHTML=`<iframe src="https://www.youtube.com/embed/${id}?autoplay=1"></iframe>`;
 return;
 }
 
 try{
-const res=await fetch(`https://api.kriszzyy.xyz/search/youtube?q=${encodeURIComponent(input)}`);
+videoBox.innerHTML="Loading...";
+
+const res=await fetch(
+`https://api.kriszzyy.xyz/search/youtube?q=${encodeURIComponent(input)}`
+);
+
 const data=await res.json();
 
-let first=data?.result?.[0]||data?.items?.[0]||data?.data?.[0];
+let first=data.result?.[0]||data.data?.[0]||data.items?.[0];
+
 let vid=first?.videoId||first?.id||first?.video_id;
 
 if(vid){
-videoBox.innerHTML=`<iframe width="100%" height="100%" src="https://www.youtube.com/embed/${vid}?autoplay=1"></iframe>`;
-}else videoBox.innerHTML="❌ Tidak ditemukan";
-
-}catch(e){
-videoBox.innerHTML="❌ Error";
+videoBox.innerHTML=`<iframe src="https://www.youtube.com/embed/${vid}?autoplay=1"></iframe>`;
+}else{
+videoBox.innerHTML="❌ Video tidak ditemukan";
 }
+
+}catch{
+videoBox.innerHTML="❌ Search Error";
+}
+}
+
+/* COPY CODE */
+function copyCode(btn){
+let code=btn.parentElement.querySelector("pre").innerText;
+
+navigator.clipboard.writeText(code);
+
+btn.innerText="✔";
+
+setTimeout(()=>{
+btn.innerText="Salin";
+},1200);
 }
 
 /* ADD MESSAGE */
 function addMessage(text,type){
 
-let processed=text;
-
-/* detect code block */
-if(typeof processed==="string" && processed.includes("```")){
-processed=processed.replace(/```([\s\S]*?)```/g,(m,code)=>{
+if(typeof text==="string"&&text.includes("```")){
+text=text.replace(/```([\s\S]*?)```/g,(m,code)=>{
 return `
 <div class="codeBox">
 <button class="copyBtn" onclick="copyCode(this)">Salin</button>
@@ -322,7 +383,7 @@ pp.innerText=type==="user"?"U":"AI";
 let bubble=document.createElement("div");
 bubble.className="bubble "+type;
 
-bubble.innerHTML=processed+`<div class="time">${getTime()}</div>`;
+bubble.innerHTML=text+`<div class="time">${getTime()}</div>`;
 
 if(type==="user"){
 row.appendChild(bubble);
@@ -338,15 +399,7 @@ messages.scrollTop=messages.scrollHeight;
 return bubble;
 }
 
-/* COPY CODE */
-function copyCode(btn){
-let code=btn.parentElement.querySelector("pre").innerText;
-navigator.clipboard.writeText(code);
-btn.innerText="✔";
-setTimeout(()=>btn.innerText="Salin",1200);
-}
-
-/* TYPING */
+/* TYPING INDICATOR */
 function typingIndicator(){
 let row=document.createElement("div");
 row.className="row aiRow";
@@ -363,8 +416,7 @@ bubble.innerHTML=`
 <div class="dot"></div>
 <div class="dot"></div>
 <div class="dot"></div>
-</div>
-`;
+</div>`;
 
 row.appendChild(pp);
 row.appendChild(bubble);
@@ -375,16 +427,15 @@ messages.scrollTop=messages.scrollHeight;
 return bubble;
 }
 
-/* CHAT */
+/* SEND AI */
 async function sendAI(){
 let text=msg.value.trim();
-if(!text && !file.files[0]) return;
 
-/* OWNER DETECT */
+if(!text&&!file.files[0])return;
+
 if(/owner|pembuat|siapa buat|who made/i.test(text)){
 addMessage("Owner web ini adalah Noval 😎","ai");
 msg.value="";
-file.value="";
 return;
 }
 
@@ -396,19 +447,39 @@ file.value="";
 let load=typingIndicator();
 
 try{
-const res=await fetch(`https://api.kriszzyy.xyz/ai/quillbot?text=${encodeURIComponent(text)}`);
+const res = await fetch(
+`https://api.kriszzyy.xyz/ai/gpt?q=${encodeURIComponent(text)}`
+);
+
 const data=await res.json();
 
-setTimeout(()=>{
-load.innerHTML=data.message+`<div class="time">${getTime()}</div>`;
-messages.scrollTop=messages.scrollHeight;
-},800);
+let reply=
+data.message||
+data.result||
+data.reply||
+"AI tidak merespon";
 
-}catch(e){
-load.innerHTML="AI error";
+load.innerHTML=`<span id="typingText"></span><div class="time">${getTime()}</div>`;
+
+let target=load.querySelector("#typingText");
+
+let i=0;
+
+let interval=setInterval(()=>{
+if(i<reply.length){
+target.innerHTML+=reply.charAt(i);
+messages.scrollTop=messages.scrollHeight;
+i++;
+}else{
+clearInterval(interval);
+}
+},25);
+
+}catch{
+load.innerHTML="AI Error";
 }
 }
 </script>
 
 </body>
-</html>
+  </html>
